@@ -50,10 +50,13 @@ class User extends Resource
 
             Text::make('Name')
                 ->sortable()
+                ->showOnPreview()
                 ->rules('required', 'max:255'),
 
             Text::make('Email')
                 ->sortable()
+                ->filterable()
+                ->showOnPreview()
                 ->rules('required', 'email', 'max:254')
                 ->creationRules('unique:users,email')
                 ->updateRules('unique:users,email,{{resourceId}}'),

@@ -2,7 +2,13 @@
 
 namespace App\Providers;
 
+use App\Nova\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Laravel\Nova\Dashboards\Main;
+use Laravel\Nova\Menu\Menu;
+use Laravel\Nova\Menu\MenuItem;
+use Laravel\Nova\Menu\MenuSection;
 use Laravel\Nova\Nova;
 use Laravel\Nova\NovaApplicationServiceProvider;
 
@@ -16,6 +22,34 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
     public function boot()
     {
         parent::boot();
+
+        Nova::mainMenu(function (Request $request) {
+            return [
+                MenuSection::dashboard(Main::class)->icon('chart-bar'),
+
+                MenuSection::make('Customers', [
+                    MenuItem::resource(User::class),
+                ])->icon('user')->collapsable(),
+
+            ];
+        });
+
+        Nova::userMenu(function (Request $request, Menu $menu) {
+            $menu->append(
+                MenuItem::make('Subscriber Dashboard')
+                    ->path('/subscribers/dashboard')
+            );
+
+            $menu->prepend(
+                MenuItem::make(
+                    'My Profile',
+                    "/resources/users/{$request->user()->getKey()}"
+                )
+            );
+
+            return $menu;
+        });
+
     }
 
     /**
@@ -26,9 +60,9 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
     protected function routes()
     {
         Nova::routes()
-                ->withAuthenticationRoutes()
-                ->withPasswordResetRoutes()
-                ->register();
+            ->withAuthenticationRoutes()
+            ->withPasswordResetRoutes()
+            ->register();
     }
 
     /**
@@ -41,9 +75,12 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
     protected function gate()
     {
         Gate::define('viewNova', function ($user) {
-            return in_array($user->email, [
-                //
-            ]);
+            // return in_array($user->email, [
+            //     //
+            //     'cyberx11@gmail.com',
+            //     'habib@nematix.com',
+            // ]);
+            return true;
         });
     }
 
